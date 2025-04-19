@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="icon" type="image/png" href="{{url_for('static',filename='logo2.png')}}">
+    <link rel="stylesheet" href="{{url_for('static',filename='style-index.css')}}">
+</head>
+<body>
+    <h1>Welcome to Data Visualization</h1>
+    <div>
+        <div class="card">
+            <h3 id="theme-title">Select Your Theme</h3>
+            <div class="canvas">
+                <canvas id="c1"></canvas>
+                <canvas id="c2"></canvas>
+                <canvas id="c3"></canvas>
+            </div>
+            <div class="input">
+                <form id="theme-form" action="/plot" method="POST">
+                    <input id="i1" type="radio" name="theme" value="orange">
+                    <input id="i2" type="radio" name="theme" value="blue">
+                    <input id="i3" type="radio" name="theme" value="pink">
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- <a href="/plot" class="link">View Plots</a> -->
+    <a href="#" class="link" id="view-plots-link">View Plots</a>
+    <script>
+        document.getElementById('view-plots-link').addEventListener('click', function(event) {
+            event.preventDefault();
+            document.getElementById('theme-form').submit();
+        });
+    </script>
+    <script>
+         document.getElementById('c1').addEventListener('click', function() {
+            document.getElementById('i1').checked = true;
+        });
+
+        document.getElementById('c2').addEventListener('click', function() {
+            document.getElementById('i2').checked = true;
+        });
+
+        document.getElementById('c3').addEventListener('click', function() {
+            document.getElementById('i3').checked = true;
+        });
+    </script>
+</body>
+</html>

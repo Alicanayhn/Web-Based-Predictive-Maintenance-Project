@@ -1,0 +1,13 @@
+pip install numpy
+pip install pandas
+pip install seaborn
+pip install joblib
+pip install xgboost
+pip install matplotlib
+pip install scikit-learn
+pip install imblearn
+pip install os
+pip install pymongo
+pip install Flask
+pip install ASPscheduler
+pip install DateTime

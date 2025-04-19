@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İletişim Yazılım</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo2.png') }}">
+    <link rel="stylesheet" href="{{url_for('static',filename='style.css')}}">
+    <style>
+        #loader {
+            position: absolute;
+            width: 100%;
+            height: 225%;
+            z-index: 1;
+            overflow: hidden;
+            background: #fff url("{{url_for('static',filename='logoGif2.gif')}}") repeat-y center top;
+            background-size: contain;
+        }
+    </style>
+    <script type="text/javascript" src="{{url_for('static',filename='refreshPage.js')}}"></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+        </div>
+        <h1 class="navbar-title">Yapay Zeka Dashboard</h1>
+    </nav>
+    <div id="loader"></div>
+    <div class="container" id="content">
+        <div class="first">
+            <div class="card-torq draggable" draggable="true" id="card-torq">
+                <h4 id="header-canvas-rem">Tahmini Beklenen Tork Değeri</h4>
+                <div class="remaining-info">
+                    <p>Parçanın Anlık Tork Değeri : {{torque_value}} Nm</p>
+                    <p id="remaining">Beklenen Tork Değeri : {{pred_torq}} Nm</p>
+                </div>
+            </div>
+            <div class="card-rem draggable" draggable="true" id="card-rem">
+                <h4 id="header-canvas-rem-tork">Tahmini Kalan Ömür</h4>
+                <div class="remaining-info-torq">
+                    <p id="remaining-torq">Parçanın Tahmini Kalan Ömrü {{day}} Gün {{saat}} Saat</p>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="card draggable" draggable="true">
+                <h4 id="header-canvas">Parça Tahmini Arıza Durumu</h4>
+                <div class="table">
+                    <canvas id='linecomp'></canvas>
+                </div>
+            </div>
+            <div class="card draggable" draggable="true">
+                <h4 id="header-canvas">Parça Tahmini Yüzdelik Ömür</h4>
+                <p style="margin-left: 235px;">Parçanın Anlık Tahmini Ömrü : %{{rounded_value}}</p>
+                <div class="table">
+                    <canvas id='linerem'></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="card draggable" draggable="true">
+                <h4 id="header-canvas">Makine Türü</h4>
+                <form action="{{url_for('get_data')}}" method="POST">
+                    <div class="DATE">
+                        <div class="take-date-start">
+                            <div class="start-date">
+                                <h5 class="header-date">Start Date</h5>
+                                <input type="date" id="date-start-type" name="date-start-type" value="2024-02-15"
+                                    min="2024-01-01" max="2024-04-13">
+                            </div>
+                        </div>
+                        <div class="take-date-end">
+                            <div class="end-date">
+                                <h5 class="header-date">End Date</h5>
+                                <input type="date" id="date-end-type" name="date-end-type" value="2024-02-15"
+                                    min="2024-01-01" max="2024-04-13">
+                            </div>
+                        </div>
+                        <div class="send-data">
+                            <div class="data-send">
+                                <h5 class="header-send">Send Date</h5>
+                                <button type="submit" class="view" onclick="save_date()">View Plot</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <div class="table">
+                    <canvas id='operatorChart'></canvas>
+                </div>
+            </div>
+            <div class="card draggable" draggable="true">
+                <h4 id="header-canvas-cat">Son 10 Verinin Kategorik Değişimi</h4>
+                <div class="table">
+                    <canvas id='lineChart'></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="card draggable" draggable="true">
+                <h4 id="header-canvas">Arıza Oranı</h4>
+                <form action="{{url_for('get_data')}}" method="POST">
+                    <div class="DATE">
+                        <div class="take-date-start">
+                            <div class="start-date">
+                                <h5 class="header-date">Start Date</h5>
+                                <input type="date" id="date-start-failure" name="date-start-failure" value="2024-02-15"
+                                    min="2024-01-01" max="2024-04-13">
+                            </div>
+                        </div>
+                        <div class="take-date-end">
+                            <div class="end-date">
+                                <h5 class="header-date">End Date</h5>
+                                <input type="date" id="date-end-failure" name="date-end-failure" value="2024-02-15"
+                                    min="2024-01-01" max="2024-04-13">
+                            </div>
+                        </div>
+                        <div class="send-data">
+                            <div class="data-send">
+                                <h5 class="header-send">Send Date</h5>
+                                <button type="submit" class="view" onclick="save_date()">View Plot</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <div class="table">
+                    <canvas id='breakdownChart'></canvas>
+                </div>
+            </div>
+            <div class="card draggable" draggable="true">
+                <h4 id="header-canvas">İşlem Sıcaklığı [K]</h4>
+                <form action="{{url_for('get_data')}}" method="POST">
+                    <div class="DATE">
+                        <div class="take-date-start">
+                            <div class="start-date">
+                                <h5 class="header-date">Start Date</h5>
+                                <input type="date" id="date-start-air" name="date-start-air" value="2024-02-15"
+                                    min="2024-01-01" max="2024-04-13">
+                            </div>
+                        </div>
+                        <div class="take-date-end">
+                            <div class="end-date">
+                                <h5 class="header-date">End Date</h5>
+                                <input type="date" id="date-end-air" name="date-end-air" value="2024-02-15"
+                                    min="2024-01-01" max="2024-04-13">
+                            </div>
+                        </div>
+                        <div class="send-data">
+                            <div class="data-send">
+                                <h5 class="header-send">Send Date</h5>
+                                <button type="submit" class="view" onclick="save_date()">View Plot</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <div class="table">
+                    <canvas id="airline"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="{{url_for('static',filename='loader.js')}}"></script>
+    <script type="text/javascript" src="{{url_for('static',filename='localStorage.js')}}"></script>
+    <script type="text/javascript" src="{{url_for('static',filename='dragAndDrop.js')}}"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const firstColor = {{ firstColor | tojson}};
+        const values = {{ values | tojson}};
+        var ctx4 = document.getElementById('operatorChart').getContext('2d');
+        var operatorChart = new Chart(ctx4, {
+            type: 'bar',
+            data: {
+                labels: ['M', 'L', 'H'],
+                datasets: [{
+                    label: 'Count',
+                    data: values,
+                    backgroundColor: firstColor,
+                    borderColor: firstColor,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: false,
+            }
+        });
+
+        const dates = {{ dates | tojson}};
+        const failure_type = {{ failure_type | tojson}};
+        const reverseMapping = {
+            0: 'Heat Dissipation',
+            1: 'No Failure',
+            2: 'Overstrain Failure',
+            3: 'Power Failure',
+            4: 'Random Failures',
+            5: 'Tool Wear Failure'
+        }
+        const thirdColor = {{ thirdColor | tojson}};
+
+        document.getElementById('card-rem').style.backgroundColor = thirdColor;
+        document.getElementById('card-torq').style.backgroundColor = thirdColor;
+
+        const ctx2 = document.getElementById('lineChart').getContext('2d');
+        const lineChart = new Chart(ctx2, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [{
+                    label: 'Target',
+                    data: failure_type,
+                    backgroundColor: thirdColor,
+                    borderColor: thirdColor,
+                    borderWidth: 1,
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        ticks: {
+                            callback: function (value) {
+                                return reverseMapping[value];
+                            },
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+        const reverseMapping2 = {
+            1: 'No Failure',
+            2: 'Air Leak Failure',
+        }
+        const last10_air = {{ last10_air | tojson}};
+        const ctx5 = document.getElementById('linecomp').getContext('2d');
+        const linecomp = new Chart(ctx5, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [{
+                    label: 'Target',
+                    data: last10_air,
+                    backgroundColor: thirdColor,
+                    borderColor: thirdColor,
+                    borderWidth: 1,
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function (value) {
+                                return reverseMapping2[value]
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        const last10_rem = {{ last10_rem | tojson}};
+        const ctx6 = document.getElementById('linerem').getContext('2d');
+        const linerem = new Chart(ctx6, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [{
+                    label: 'Parçanın Tahmin Edilen Yüzdelik Ömrü',
+                    data: last10_rem,
+                    backgroundColor: thirdColor,
+                    borderColor: thirdColor,
+                    tension: 0.4,
+                    fill: false
+                }]
+            }
+        });
+        const secondColor = {{ secondColor | tojson}};
+        const values2 = {{ values2 | tojson}};
+
+        var ctx3 = document.getElementById('breakdownChart').getContext('2d');
+        var breakdownChart = new Chart(ctx3, {
+            type: 'bar',
+            data: {
+                labels: ['No Failure', 'Random Failures', 'Tool Wear Failure', 'Overstrain Failure', 'HD Failure', 'Power Failure'],
+                datasets: [{
+                    label: 'Arıza',
+                    data: values2,
+                    backgroundColor: [secondColor[0], secondColor[1], secondColor[2], secondColor[3], secondColor[4], secondColor[5]]
+                }]
+            },
+            options: {
+                responsive: false,
+            }
+        });
+        const data = {{ air_temp | tojson }};
+
+        const ctx7 = document.getElementById('airline').getContext('2d');
+        const totalDuration = 2500;
+        const delayBetweenPoints = totalDuration / data.length;
+
+        const previousY = (ctx) => ctx.index === 0 ? ctx.chart.scales.y.getPixelForValue(100) : ctx.chart.getDatasetMeta(ctx.datasetIndex).data[ctx.index - 1].getProps(['y'], true).y;
+
+        const animation = {
+            x: {
+                type: 'number',
+                easing: 'easeInQuad',
+                duration: delayBetweenPoints,
+                from: NaN,
+                delay(ctx) {
+                    if (ctx.type !== 'data' || ctx.xStarted) {
+                        return 0;
+                    }
+                    ctx.xStarted = true;
+                    return ctx.index * delayBetweenPoints;
+                }
+            },
+            y: {
+                type: 'number',
+                easing: 'easeInQuad',
+                duration: delayBetweenPoints,
+                from: previousY,
+                delay(ctx) {
+                    if (ctx.type !== 'data' || ctx.yStarted) {
+                        return 0;
+                    }
+                    ctx.yStarted = true;
+                    return ctx.index * delayBetweenPoints;
+                }
+            }
+        };
+
+        const airline = new Chart(ctx7, {
+            type: 'line',
+            data: {
+                labels: data.map((_, index) => index + 1),
+                datasets: [{
+                    label: 'İşlem Sıcaklığı',
+                    borderColor: thirdColor,
+                    borderWidth: 2,
+                    radius: 0,
+                    data: data,
+                }]
+            },
+            options: {
+                animation,
+                interaction: {
+                    intersect: false
+                },
+                plugins: {
+                    legend: true
+                },
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom'
+                    },
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
